@@ -1,0 +1,470 @@
+; ============================================================
+;   JJS BLACK FLASH MACRO v5.0 - MULTI-THEME ULTRA EDITION
+;   Jujutsu Shenanigans - Pro Tech Edition
+;   AutoHotkey v1.1+
+; ============================================================
+
+#NoEnv
+#SingleInstance Force
+#MaxHotkeysPerInterval 200
+SendMode Input
+SetWorkingDir %A_ScriptDir%
+SetKeyDelay, 8, 8
+SetBatchLines, -1
+
+; ========================
+;  CONFIG & COLOR ARRAYS
+; ========================
+Global Mode       := 0
+Global BFDelay    := 350
+Global Awakened   := false
+Global ThemeMode  := 0  ; 0: Dark, 1: Light, 2: RGB Light, 3: RGB Dark
+Global ThemeNames := ["DARK NEON", "CLEAN LIGHT", "RGB LIGHT", "RGB DARK"]
+
+Global C_NAME  := []
+Global C_INPUT := []
+Global C_COLOR := []
+Global C_CHAR  := []
+
+C_NAME[0]  := "⚡ [ YUJI ITADORI ] ⚡"
+C_CHAR[0]  := "THE VESSEL // CURSED STRIKE"
+C_INPUT[0] := "⚡ [3] ──► [3] ⚡"
+C_COLOR[0] := "FF1493" ; Deep Neon Pink
+
+C_NAME[1]  := "🌀 [ SATORU GOJO ] 🌀"
+C_CHAR[1]  := "THE HONORED ONE // LIMITLESS"
+C_INPUT[1] := "🌀 [2] ──► [R x10] 🌀"
+C_COLOR[1] := "00FFFF" ; Neon Electric Cyan
+
+C_NAME[2]  := "💀 [ MAHITO ] 💀"
+C_CHAR[2]  := "PERFECTION // IDLE TRANSFIGURATION"
+C_INPUT[2] := "💀 [3] ──► [3] 💀"
+C_COLOR[2] := "A020F0" ; Vibrant Purple
+
+C_NAME[3]  := "✨ [ AOI TODO ] ✨"
+C_CHAR[3]  := "BOOGIE WOOGIE // SWITCHER"
+C_INPUT[3] := "✨ [3] ➔ [R] ➔ [2] ➔ [2] ✨"
+C_COLOR[3] := "FFD700" ; Cyber Gold
+
+C_NAME[4]  := "🎯 [ KENTO NANAMI ] 🎯"
+C_CHAR[4]  := "7:3 RATIO // SALARYMAN"
+C_INPUT[4] := "🎯 [R] ──► [R] 🎯"
+C_COLOR[4] := "39FF14" ; Neon Acid Lime
+
+Global CharCount := 5
+
+IniRead, Mode,      %A_ScriptDir%\jjs.ini, cfg, mode,  0
+IniRead, BFDelay,   %A_ScriptDir%\jjs.ini, cfg, delay, 350
+IniRead, ThemeMode, %A_ScriptDir%\jjs.ini, cfg, theme, 0
+IniRead, OvX,       %A_ScriptDir%\jjs.ini, cfg, x,     20
+IniRead, OvY,       %A_ScriptDir%\jjs.ini, cfg, y,     20
+
+if (Mode >= CharCount)
+    Mode := 0
+if (ThemeMode > 3 || ThemeMode < 0)
+    ThemeMode := 0
+
+; Dynamic Rainbow Gradient Palette for RGB Themes
+Global RGB_Colors := ["FF0055", "FF5500", "FFAA00", "39FF14", "00FFFF", "0055FF", "A020F0", "FF00AA"]
+Global RGB_Index := 1
+
+; Theme Color Maps [Main BG, Panel BG, Panel Border, Primary Text, Sub Text, Hotkey Text]
+Global Theme_Dark     := ["030308", "0D021A", "1A0533", "FFFFFF", "00FFCC", "39FF14"]
+Global Theme_Light    := ["F0F2F5", "FFFFFF", "D1D5DB", "111827", "4B5563", "0284C7"]
+Global Theme_RGBLight := ["FAFAFA", "FFFFFF", "E5E7EB", "111827", "6B7280", "D97706"]
+Global Theme_RGBDark  := ["05050A", "0A0A14", "141428", "FFFFFF", "9CA3AF", "FF00AA"]
+
+; ========================
+;  BUILD MULTI-THEME UI
+; ========================
+BuildUI(OvX, OvY)
+SetTimer, CycleRGB, 100 ; Animated dynamic RGB loop
+return
+
+GetActiveTheme() {
+    Global
+    if (ThemeMode == 0)
+        return Theme_Dark
+    else if (ThemeMode == 1)
+        return Theme_Light
+    else if (ThemeMode == 2)
+        return Theme_RGBLight
+    else
+        return Theme_RGBDark
+}
+
+BuildUI(px, py) {
+    Global
+    W := 360
+    t := GetActiveTheme()
+    
+    bgMain   := t[1]
+    bgPanel  := t[2]
+    bdPanel  := t[3]
+    txtPrimary := t[4]
+    txtSub     := t[5]
+    txtHK      := t[6]
+
+    Gui, Ov: Destroy
+    Gui, Ov: -Caption +AlwaysOnTop +ToolWindow +LastFound
+    Gui, Ov: Color, %bgMain%
+    WinSet, Transparent, 252
+    Gui, Ov: Margin, 0, 0
+
+    charColor := C_COLOR[Mode]
+
+    ; ── TRIPLE NEON GLOW BORDERS ─────────────
+    Gui, Ov: Add, Progress, x0 y0 w%W% h3 Background%charColor% c%charColor% vBorderTop1, 100
+    Gui, Ov: Add, Progress, x0 y3 w%W% h2 BackgroundFF0055 cFF0055 vBorderTop2, 100
+    Gui, Ov: Add, Progress, x0 y615 w%W% h3 Background%charColor% c%charColor% vBorderBot1, 100
+
+    ; ── FLASHY HEADER ────────────────────────
+    Gui, Ov: Font, c%charColor% s11 Bold, Segoe UI
+    Gui, Ov: Add, Text, x0 y10 w%W% Center BackgroundTrans vHeaderTitle, 🗲🗲🗲 YourBestoFriendo 🗲🗲🗲
+
+    ; ── CHARACTER DISPLAY CARD ───────────────
+    Gui, Ov: Add, Progress, x10 y36 w340 h72 Background%bgPanel% c%bdPanel% vCardBg, 100
+    Gui, Ov: Add, Progress, x12 y38 w336 h2 Background%charColor% c%charColor% vCardAccent, 100
+
+    Gui, Ov: Font, c%charColor% s16 Bold, Segoe UI
+    Gui, Ov: Add, Text, x10 y45 w340 Center BackgroundTrans vCharLabel, % C_NAME[Mode]
+
+    Gui, Ov: Font, c%txtSub% s8 Bold, Consolas
+    Gui, Ov: Add, Text, x10 y78 w340 Center BackgroundTrans vCharSub, % C_CHAR[Mode]
+
+    ; ── STATUS DASHBOARD ─────────────────────
+    Gui, Ov: Add, Progress, x10 y114 w340 h44 Background%bgPanel% c%bdPanel% vStatusBg, 100
+
+    Gui, Ov: Font, c%txtHK% s11 Bold, Segoe UI
+    Gui, Ov: Add, Text, x20 y125 w160 Left BackgroundTrans vStatusDot, 🗲 STATUS: READY
+
+    Gui, Ov: Font, c%txtHK% s10 Bold, Segoe UI
+    Gui, Ov: Add, Text, x180 y125 w160 Right BackgroundTrans vAwakenLabel, ★ BASE FORM ★
+
+    ; ── COMBO & TIMING MATRIX ────────────────
+    Gui, Ov: Add, Progress, x10 y164 w340 h76 Background%bgPanel% c%bdPanel% vComboBg, 100
+
+    Gui, Ov: Font, c%charColor% s8 Bold, Segoe UI
+    Gui, Ov: Add, Text, x20 y172 w150 Left BackgroundTrans vComboHeader, ── COMBO EXECUTION ──
+    Gui, Ov: Font, c%txtSub% s8 Bold, Segoe UI
+    Gui, Ov: Add, Text, x190 y172 w150 Right BackgroundTrans vTimingHeader, ── LATENCY (F5/F6) ──
+
+    Gui, Ov: Font, c%txtPrimary% s11 Bold, Consolas
+    Gui, Ov: Add, Text, x20 y198 w180 Left BackgroundTrans vInputLabel, % C_INPUT[Mode]
+
+    Gui, Ov: Font, cFFD700 s16 Bold, Consolas
+    Gui, Ov: Add, Text, x190 y194 w150 Right BackgroundTrans vDelayLabel, % BFDelay . " ms"
+
+    ; ── CORE HOTKEYS MATRIX ──────────────────
+    Gui, Ov: Add, Progress, x10 y246 w340 h148 Background%bgPanel% c%bdPanel% vHotkeysBg, 100
+    
+    Gui, Ov: Font, c%charColor% s10 Bold, Segoe UI
+    Gui, Ov: Add, Text, x20 y254 w200 Left BackgroundTrans vCoreHeader, 🗲 CORE COMMANDS 🗲
+
+    LX := 22
+    RX := 250
+    KW := 90
+
+    Gui, Ov: Font, c%txtPrimary% s9, Segoe UI
+    Gui, Ov: Add, Text, x%LX% y278 w180 BackgroundTrans, Execute Black Flash Combo
+    Gui, Ov: Add, Text, x%LX% y300 w180 BackgroundTrans, Cycle Character (Next / Prev)
+    Gui, Ov: Add, Text, x%LX% y322 w180 BackgroundTrans, Toggle Awakening State (G)
+    Gui, Ov: Add, Text, x%LX% y344 w180 BackgroundTrans, Toggle HUD Visibility
+
+    Gui, Ov: Font, c%txtHK% s9 Bold, Consolas
+    Gui, Ov: Add, Text, x%RX% y278 w%KW% Right BackgroundTrans, 【 F1 】
+    Gui, Ov: Add, Text, x%RX% y300 w%KW% Right BackgroundTrans, 【 F2 / F3 】
+    Gui, Ov: Add, Text, x%RX% y322 w%KW% Right BackgroundTrans, 【 F4 】
+    Gui, Ov: Add, Text, x%RX% y344 w%KW% Right BackgroundTrans, 【 ~ 】
+
+    ; ── PRO TECHS MATRIX ─────────────────────
+    Gui, Ov: Add, Progress, x10 y400 w340 h148 Background%bgPanel% c%bdPanel% vTechsBg, 100
+
+    Gui, Ov: Font, c%charColor% s10 Bold, Segoe UI
+    Gui, Ov: Add, Text, x20 y408 w200 Left BackgroundTrans vTechHeader, ⚡ ADVANCED PRO TECHS ⚡
+
+    Gui, Ov: Font, c%txtPrimary% s9, Segoe UI
+    Gui, Ov: Add, Text, x%LX% y432 w180 BackgroundTrans, Feint Cancel
+    Gui, Ov: Add, Text, x%LX% y454 w180 BackgroundTrans, Ragdoll Cancel
+    Gui, Ov: Add, Text, x%LX% y476 w180 BackgroundTrans, Slide Walk
+    Gui, Ov: Add, Text, x%LX% y498 w180 BackgroundTrans, Perfect 3x M1 Burst
+
+    Gui, Ov: Font, c%txtHK% s9 Bold, Consolas
+    Gui, Ov: Add, Text, x%RX% y432 w%KW% Right BackgroundTrans, 【 F7 】
+    Gui, Ov: Add, Text, x%RX% y454 w%KW% Right BackgroundTrans, 【 F8 】
+    Gui, Ov: Add, Text, x%RX% y476 w%KW% Right BackgroundTrans, 【 F9 】
+    Gui, Ov: Add, Text, x%RX% y498 w%KW% Right BackgroundTrans, 【 F10 】
+
+    ; ── THEME CONTROLLER & FOOTER ───────────
+    Gui, Ov: Add, Progress, x10 y554 w340 h26 Background%bgPanel% c%bdPanel% vThemeBarBg, 100
+    Gui, Ov: Font, c%charColor% s9 Bold, Consolas
+    
+    currentThemeStr := "🎨 THEME [F11]: " . ThemeNames[ThemeMode+1]
+    Gui, Ov: Add, Text, x20 y558 w320 Center BackgroundTrans vThemeLabel, %currentThemeStr%
+
+    Gui, Ov: Add, Progress, x10 y584 w340 h26 Background%bgPanel% c%bdPanel% vExitBarBg, 100
+    Gui, Ov: Font, cFF0055 s9 Bold, Consolas
+    Gui, Ov: Add, Text, x20 y588 w320 Center BackgroundTrans, ✖ SHUTDOWN SYSTEM ➔ 【 F12 】
+
+    Gui, Ov: Show, x%px% y%py% w%W% h618 NoActivate, JJS
+
+    OnMessage(0x201, "WM_LBUTTONDOWN")
+    OnMessage(0x202, "WM_LBUTTONUP")
+}
+
+; ========================
+;  DYNAMIC ANIMATIONS & UPDATES
+; ========================
+CycleRGB:
+    RGB_Index := Mod(RGB_Index, RGB_Colors.MaxIndex()) + 1
+    cColor := RGB_Colors[RGB_Index]
+    
+    ; If theme is RGB Light (2) or RGB Dark (3), cycle text and accents live
+    if (ThemeMode == 2 || ThemeMode == 3) {
+        GuiControl, Ov: +Background%cColor% +c%cColor%, BorderTop2
+        Gui, Ov: Font, c%cColor%
+        GuiControl, Ov: Font, HeaderTitle
+        GuiControl, Ov: Font, CoreHeader
+        GuiControl, Ov: Font, TechHeader
+        GuiControl, Ov: Font, ComboHeader
+        GuiControl, Ov: Font, ThemeLabel
+    } else {
+        GuiControl, Ov: +Background%cColor% +c%cColor%, BorderTop2
+    }
+return
+
+RefreshUI() {
+    Global
+    WinGetPos, curX, curY,,, JJS
+    if (curX == "") {
+        curX := OvX
+        curY := OvY
+    }
+    BuildUI(curX, curY)
+}
+
+SetStatus(txt, color := "39FF14") {
+    Global
+    Gui, Ov: Font, c%color% s11 Bold, Segoe UI
+    GuiControl, Ov: Font, StatusDot
+    GuiControl, Ov:, StatusDot, %txt%
+}
+
+FlashStatus() {
+    SetStatus("⚡ STRIKING BLACK FLASH!", "FF0055")
+    SetTimer, ResetStatus, -1000
+}
+ResetStatus:
+    SetStatus("🗲 STATUS: READY", "39FF14")
+return
+
+; ========================
+;  SAVE / DRAG
+; ========================
+SaveConfig() {
+    Global
+    WinGetPos, sx, sy,,, JJS
+    IniWrite, %Mode%,      %A_ScriptDir%\jjs.ini, cfg, mode
+    IniWrite, %BFDelay%,   %A_ScriptDir%\jjs.ini, cfg, delay
+    IniWrite, %ThemeMode%, %A_ScriptDir%\jjs.ini, cfg, theme
+    if (sx != "")
+        IniWrite, %sx%, %A_ScriptDir%\jjs.ini, cfg, x
+    if (sy != "")
+        IniWrite, %sy%, %A_ScriptDir%\jjs.ini, cfg, y
+}
+
+WM_LBUTTONDOWN(wParam, lParam, msg, hwnd) {
+    PostMessage, 0xA1, 2,,, A
+}
+
+WM_LBUTTONUP(wParam, lParam, msg, hwnd) {
+    SaveConfig()
+}
+
+; ========================
+;  BLACK FLASH FUNCTIONS
+; ========================
+
+BF_Standard() {
+    Global BFDelay
+    Send {3}
+    Sleep, %BFDelay%
+    Send {3}
+}
+
+BF_Gojo() {
+    Send {2}
+    Sleep, 280
+    Loop, 10 {
+        Send {r}
+        Sleep, 30
+    }
+}
+
+BF_Todo() {
+    Global BFDelay
+    Send {3}
+    Sleep, 900
+    Send {r}
+    Sleep, 150
+    Send {2}
+    Sleep, 700
+    Send {2}
+}
+
+BF_Nanami() {
+    Send {r}
+    Sleep, 750
+    Send {r}
+}
+
+ExecuteBlackFlash() {
+    Global Mode
+    Switch Mode {
+        Case 0: BF_Standard()
+        Case 1: BF_Gojo()
+        Case 2: BF_Standard()
+        Case 3: BF_Todo()
+        Case 4: BF_Nanami()
+    }
+}
+
+; ========================
+;  PRO TECHS
+; ========================
+
+DoFeint() {
+    Global Mode
+    Switch Mode {
+        Case 3:
+            Send {1}
+            Sleep, 150
+            Send {r}
+        Default:
+            Send {3}
+            Sleep, 80
+            Send {r}
+    }
+}
+
+DoRagdollCancel() {
+    Send {a down}
+    Sleep, 10
+    Send {q}
+    Sleep, 50
+    Send {a up}
+}
+
+DoSlideWalk() {
+    Send {w down}
+    Sleep, 30
+    Send {w}
+    Sleep, 30
+    Send {q}
+    Sleep, 200
+    Send {w up}
+}
+
+DoM1Burst() {
+    Click
+    Sleep, 175
+    Click
+    Sleep, 175
+    Click
+}
+
+; ========================
+;  HOTKEYS — ROBLOX ONLY
+; ========================
+#IfWinActive ahk_exe RobloxPlayerBeta.exe
+
+F1::
+    if (Awakened)
+        return
+    FlashStatus()
+    ExecuteBlackFlash()
+return
+
+F2::
+    Mode := Mod(Mode + 1, CharCount)
+    RefreshUI()
+    SaveConfig()
+return
+
+F3::
+    Mode := Mode - 1
+    if (Mode < 0)
+        Mode := CharCount - 1
+    RefreshUI()
+    SaveConfig()
+return
+
+F4::
+    Awakened := !Awakened
+    RefreshUI()
+    if (Awakened)
+        SetStatus("⛔ LOCKED (AWAKENED)", "FF0055")
+    else
+        SetStatus("🗲 STATUS: READY", "39FF14")
+return
+
+F5::
+    BFDelay := (BFDelay - 5 < 100) ? 100 : BFDelay - 5
+    RefreshUI()
+    SaveConfig()
+return
+
+F6::
+    BFDelay := (BFDelay + 5 > 600) ? 600 : BFDelay + 5
+    RefreshUI()
+    SaveConfig()
+return
+
+F7::
+    if (Awakened)
+        return
+    DoFeint()
+return
+
+F8::
+    DoRagdollCancel()
+return
+
+F9::
+    DoSlideWalk()
+return
+
+F10::
+    if (Awakened)
+        return
+    DoM1Burst()
+return
+
+F11::
+    ThemeMode := Mod(ThemeMode + 1, 4)
+    RefreshUI()
+    SaveConfig()
+return
+
+#IfWinActive
+
+; ========================
+;  GLOBAL HOTKEYS
+; ========================
+Global OvHidden := false
+`::
+    if (OvHidden) {
+        Gui, Ov: Show, NoActivate
+        OvHidden := false
+    } else {
+        SaveConfig()
+        Gui, Ov: Hide
+        OvHidden := true
+    }
+return
+
+F12::
+    SaveConfig()
+    Gui, Ov: Destroy
+    ExitApp
+return
